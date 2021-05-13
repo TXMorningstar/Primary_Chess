@@ -1,5 +1,4 @@
 from tools import *
-from copy import copy
 from copy import deepcopy
 
 
@@ -118,8 +117,8 @@ class Board(object):
         """传入棋子原坐标和探索点坐标，检查棋盘坐标点内棋子是否为有方"""
         if not board:
             board = self.board
-        if 0 < abs(board[pos[0]][pos[1]] - board[expo_pos[0]][expo_pos[1]]) >= 10 or board[expo_pos[0]][
-            expo_pos[1]] == 0:
+        if (0 < abs(board[pos[0]][pos[1]] - board[expo_pos[0]][expo_pos[1]]) >= 10) or (
+                board[expo_pos[0]][expo_pos[1]]) == 0:
             return True  # 不为己方棋子
 
     def get_ally_chess(self, king: int, board: tuple = None) -> tuple:
@@ -409,7 +408,8 @@ class Board(object):
 
     def judge(self) -> bool:
         """判断玩家是否获胜。可选择传入指定的棋盘。返回一个布尔值，真代表当前执子方获胜"""
-        # 检查双方将是否存在
+        if self.get_chess_pos(1):
+            pass
         # 王见面最后判定
         if self.king_meet():  # 若在执子方回合发生王见面，则执子方落败
             return False
