@@ -27,8 +27,7 @@ def cprint(msg:str, fg:str = "white", bg:str = "black", end:str = "\n"):
 
 def switch_side(turn: int) -> int:
     """切换执子方，传入一个int，0代表红1代表黑"""
-    global SIDE
-    if SIDE == 1:
-        SIDE = 21
+    if turn == 1:
+        return 21
     else:
-        SIDE == 1
+        return 1

@@ -1,4 +1,6 @@
 from tools import *
+from copy import copy
+from copy import deepcopy
 
 
 class Board(object):
@@ -206,8 +208,9 @@ class Board(object):
 
     def movable(self, pos: tuple, board: tuple = None, price: bool = False) -> tuple:
         """获取某个棋子可以移动的范围，随后调用对应的方法"""
-        chess = self.board[pos[0]][pos[1]]
-        print("选择的棋子:", self.mapping[chess])
+        if not board:
+            board = self.board
+        chess = board[pos[0]][pos[1]]
         function_map = {
             1: self.king,
             21: self.king,
@@ -224,7 +227,7 @@ class Board(object):
             7: self.pawn,
             27: self.pawn
         }
-        if not self.check_chess_type_by_pos(pos, 0):
+        if not self.check_chess_type_by_pos(pos, 0, board=board):
             return function_map[chess](pos, board=board, price=price)
 
     def king(self, pos: tuple, board: tuple = None, price: bool = False) -> tuple:
@@ -343,7 +346,6 @@ class Board(object):
                 ex, ey = ex + strategy[0], ey + strategy[1]  # 更新探索点
                 if self.inside_board((ex, ey)):
                     if self.check_chess_type_by_pos((ex, ey), 0, board=board):
-                        result.append((ex, ey, board[ex][ey]))
                         continue  # 如果探索点为空，则进行下一次搜索
                     else:  # 探索点发现棋子，这个棋子无法吃掉，我们需要跳过它进行第二次搜索
                         while True:
@@ -395,10 +397,10 @@ class Board(object):
         """移动某个棋子，并返回移动棋子后的棋盘。传入参数：棋子坐标，目标坐标，是否更新实例对象中的棋盘，要使用的棋盘"""
         if not board:
             board = self.board
-        new_board = self.board
+        new_board = deepcopy(board)
 
-        if end in self.movable(start, board):
-            new_board[start[0]][start[1]], new_board[end[0]][end[1]] = 0, board[start[0]][start[1]]  # 更新新棋盘的数组
+        if end in self.movable(start, new_board):
+            new_board[start[0]][start[1]], new_board[end[0]][end[1]] = 0, new_board[start[0]][start[1]]  # 更新新棋盘的数组
             if confirm:
                 self._update_board(new_board, board)
             return new_board

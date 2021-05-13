@@ -1,10 +1,12 @@
 # Primary chess
-* 目录
+
+* ## 目录
   * [简介](#1)
   * [使用说明](#2)
   * [函数-类-方法](#3)
-    * [cprint()](3.1)
+    * [cprint()](#3.1)
     * [Board()](#3.2)
+    * [Tree()](#3.3)
   * [版本规划](#4)
   * [测试](#5)
 
@@ -48,9 +50,15 @@ Game类包含了操作棋盘和棋子的最底层的方法。
    这个方法可以将棋盘以数值的形式**打印**到控制台上
    
 
-3. `get_ally_chess(self, king: int, board: tuple = None) -> tuple`  
+3. `get_ally_chess(self, king: int, board: tuple = None) -> tuple`
    调用这个方法会**返回**某一阵营的所有友方棋子坐标
+   
 
+4. `movable(self, pos: tuple, board: tuple = None, price: bool = False) -> tuple`  
+   调用这个方法会返回某一个棋子的所有可以进行移动的坐标
+   
+
+<h3 id="3.3">Tree()</h3>
 
 
 
