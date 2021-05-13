@@ -1,32 +1,3 @@
-# class Node(object):
-#     """节点对象"""
-#
-#     def __init__(self, board: tuple, side: int, price: int, *args, location: "str" = None, parent: object = None):
-#         self.board = board
-#         self.side = side
-#         self.price = price
-#         self.parent = parent
-#         self.locator = location
-#         self.leaf = list(args)  # 在这里存储它的子节点
-#
-#
-# class Tree(object):
-#     """树管理器"""
-#     def __init__(self, board: tuple, side: int, price: int):
-#         self.tree = Node(board, side, price)  # 创建根节点
-#         self.members = [self.tree]
-#         self.depth = 0
-#
-#     def get_node_by_level(self, level):
-#         for i in range
-#
-#
-#     def expand(self):
-#         pass
-#
-#     def grow(self):
-
-
 from copy import deepcopy
 from tools import *
 
@@ -34,11 +5,14 @@ from tools import *
 class Node(object):
     """节点对象"""
 
-    def __init__(self, board: tuple, side: int, price: int, location: str = None):
+    def __init__(self, board: tuple, side: int, price: int, location: list = []):
         self.board = board
         self.side = side
         self.price = price
         self.location = location
+
+    def __repr__(self):
+        return "node"
 
 
 class Tree(object):
@@ -47,12 +21,12 @@ class Tree(object):
     def __init__(self):
         self.tree = ["root"]
 
-    def get_node(self, location: str, leaf: bool = False):
+    def get_node(self, location: list, leaf: bool = False):
         """获取某个节点"""
         node = self.tree
         if location:  # 防止请求根节点
             for i in location:
-                node = node[int(i)]  # 索引至树
+                node = node[i]  # 索引至树
 
         if leaf:
             return node
@@ -82,27 +56,17 @@ class Tree(object):
                         result.append(node[0])
         return result
 
-    def insert_node(self, node: object, location: str = "") -> str:
+    def insert_node(self, node: object, location: list = "") -> str:
         """在树的指定位置插入一个节点，返回节点的定位符"""
         # 获取需要插入节点的位置
         parent = self.get_node(location, leaf=True)
         # 插入节点
         parent.append([node])
         # 更新节点定位符信息
-        child_location = location + repr(parent.__len__() - 1)
+        child_location = deepcopy(location)
+        child_location.append(parent.__len__() - 1)
         node.location = child_location
         return child_location
-
-    def del_node(self, location: str = ""):
-        """通过定位符删除节点
-        删除节点会造成定位符混乱，应尽量避免使用此方法
-        说明：找到父节点后，再使用pop方法删除掉指定的节点"""
-        if location == "":
-            self.tree = list()
-            return
-
-        node = self.get_node(location[:-1], True)
-        node.pop(int(location[-1]))
 
 
 class ChessTree(Tree):

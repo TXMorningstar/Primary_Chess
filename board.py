@@ -301,7 +301,7 @@ class Board(object):
                     # 第一次搜索完成，撇脚马排除
                     for i in range(2):  # 接下来需要进行两次叶节点检查，i代表检查的方向
                         ex_nd, ey_nd = ex + strategy[1][i][0], ey + strategy[1][i][1]  # 根据上一个探索点的位置赋值下一个探索点
-                        if self.inside_board((ex, ey)):
+                        if self.inside_board((ex_nd, ey_nd)):
                             if self.not_ally_chess((x, y), (ex_nd, ey_nd), board):
                                 if price:
                                     result.append((ex, ey, board[ex][ey]))  # 将结果加入元组准备返回

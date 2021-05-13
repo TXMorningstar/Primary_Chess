@@ -5,7 +5,8 @@ from tools import *
 MAINBOARD = board.Board()
 SIDE = 1
 
-root = Node(tuple(MAINBOARD.board), SIDE, 0, "")
+root = Node(tuple(MAINBOARD.board), SIDE, 0)
 tree = ChessTree(root, MAINBOARD)
-for i in range(5):
+
+for i in range(4):
     tree.grow()
