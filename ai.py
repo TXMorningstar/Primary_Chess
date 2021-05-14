@@ -76,7 +76,6 @@ class MinimaxTreeSearch(Tree):
     """使用遍历所有可行动路线的方式判断下一个落子点"""
     def __init__(self, root: object, board_obj: object):
         super().__init__(root)
-        self.tree = [root]
         self.board_obj = board_obj
         self.depth = 0
 

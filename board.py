@@ -227,6 +227,7 @@ class Board(object):
             27: self.pawn
         }
         if not self.check_chess_type_by_pos(pos, 0, board=board):
+            # noinspection PyArgumentList
             return function_map[chess](pos, board=board, price=price)
 
     def king(self, pos: tuple, board: tuple = None, price: bool = False) -> tuple:
@@ -303,9 +304,9 @@ class Board(object):
                         if self.inside_board((ex_nd, ey_nd)):
                             if self.not_ally_chess((x, y), (ex_nd, ey_nd), board):
                                 if price:
-                                    result.append((ex, ey, board[ex][ey]))  # 将结果加入元组准备返回
+                                    result.append((ex_nd, ey_nd, board[ex_nd][ey_nd]))  # 将结果加入元组准备返回
                                 else:
-                                    result.append((ex, ey))
+                                    result.append((ex_nd, ey_nd))
         return tuple(result)
 
     def chariot(self, pos: tuple, board: tuple = None, price: bool = False) -> tuple:
