@@ -31,11 +31,12 @@ def input_chess(msg: str = None) -> tuple:
 
 def single_vs_single():
     """玩家对战自己"""
+    global SIDE
     move_start = input_chess("你想要移动哪一颗棋子？")
     if move_start in MAIN_BOARD.get_ally_chess(SIDE):
         move_end = input_chess("要移动到哪里去？")
-        MAIN_BOARD.move(move_start, move_end)
-        switch_side(SIDE)
+        MAIN_BOARD.move(move_start, move_end, confirm=True)
+        SIDE = switch_side(SIDE)
     else:
         print("只能移动自己的棋子")
 

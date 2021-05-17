@@ -182,7 +182,7 @@ class Board(object):
             else:
                 return False
 
-    def cross_river(self, pos: tuple, expo_pos: tuple) -> bool:
+    def _cross_river(self, pos: tuple, expo_pos: tuple) -> bool:
         """传入一个棋子的坐标以及探索点坐标，返回探索点位置是否过河"""
         x, y, ex, ey = pos[0], pos[1], expo_pos[0], expo_pos[1]
         if self.board[x][y] <= 10:
@@ -195,6 +195,14 @@ class Board(object):
                 return False
             else:
                 return True
+
+    def cross_river(self, ypos: tuple, side: int, board: tuple = None) -> bool:
+        if not board:
+            board = self.board
+        if side == 1:
+            pass
+        else:
+            pass
 
     def check_chess_type_by_pos(self, pos: tuple, *args: int, board: tuple = None) -> bool:
         if not board:
@@ -277,7 +285,7 @@ class Board(object):
             ex, ey = x + strategy[0], y + strategy[1]  # 更新探索点
             if self.inside_board((ex, ey)):
                 if self.not_ally_chess((x, y), (ex, ey), board):
-                    if not self.cross_river(pos, (ex, ey)):
+                    if not self._cross_river(pos, (ex, ey)):
                         if price:
                             result.append((ex, ey, board[ex][ey]))  # 将结果加入元组准备返回
                         else:
@@ -374,7 +382,7 @@ class Board(object):
         chess = board[x][y]  # 找到棋子的具体数值，根据它来决定移动策略
         result = list()
 
-        if self.cross_river((x, y), (x, y)):  # 过河后
+        if self._cross_river((x, y), (x, y)):  # 过河后
             for strategy in self.pawn_strategy_crossed[chess]:
                 ex, ey = x + strategy[0], y + strategy[1]
                 if self.inside_board((ex, ey)):

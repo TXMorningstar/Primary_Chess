@@ -15,7 +15,7 @@ class Node(object):
         self.location = copy(location)
 
     def __repr__(self):
-        return "node"
+        return self.price
 
 
 class Tree(object):
@@ -74,6 +74,7 @@ class Tree(object):
 
 class MinimaxTreeSearch(Tree):
     """使用遍历所有可行动路线的方式判断下一个落子点"""
+
     def __init__(self, root: object, board_obj: object):
         super().__init__(root)
         self.board_obj = board_obj
@@ -108,6 +109,32 @@ class MinimaxTreeSearch(Tree):
                 self.expand(node, step)  # 根据战略表拓展树
         self.depth += 1
 
-    # TODO: 逐个分析每一个节点
+    def price_estimate(self, chess: int, side: int) -> int:
+        """调用这个方法后，返回一个更可信的价值
+        不过无论再可信也只不过是一个Naive value罢了"""
 
+        # 需要判断的棋子一定是敌方棋子
+        # 判断卒的价值一定需要y坐标
+        # 
+
+        price_map = {
+            1: {1: 10,
+                2: 1,
+                3: 1,
+                4: 2,
+                5: 2,
+                6: 2,
+                7: pawn_value(side, pos)
+                },
+
+            21: {21: 10,
+                 22: 1,
+                 23: 1,
+                 24: 2,
+                 25: 2,
+                 26: 2,
+                 27: pawn_value()
+                 }
+        }
+        return price_map[side][chess]
     # TODO: 反向传播
