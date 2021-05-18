@@ -196,14 +196,6 @@ class Board(object):
             else:
                 return True
 
-    def cross_river(self, ypos: tuple, side: int, board: tuple = None) -> bool:
-        if not board:
-            board = self.board
-        if side == 1:
-            pass
-        else:
-            pass
-
     def check_chess_type_by_pos(self, pos: tuple, *args: int, board: tuple = None) -> bool:
         if not board:
             board = self.board

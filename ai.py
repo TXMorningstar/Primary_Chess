@@ -75,10 +75,11 @@ class Tree(object):
 class MinimaxTreeSearch(Tree):
     """使用遍历所有可行动路线的方式判断下一个落子点"""
 
-    def __init__(self, root: object, board_obj: object):
+    def __init__(self, root: object, side: int, board_obj: object):
         super().__init__(root)
         self.board_obj = board_obj
         self.depth = 0
+        self.side = side
 
     def analyze(self, node: object) -> tuple:
         """该方法会返回节点下所有可以行动的策略"""
@@ -109,32 +110,58 @@ class MinimaxTreeSearch(Tree):
                 self.expand(node, step)  # 根据战略表拓展树
         self.depth += 1
 
-    def price_estimate(self, chess: int, side: int) -> int:
+    def _pawn_value(self, xpos: int, negative: bool = False) -> int:
+        # reverse代表正在被计算的棋子是一颗自己的棋子
+        if negative:
+            if xpos <= 4:
+                return -2
+            else:
+                return -6
+        else:
+            if xpos <= 4:
+                return 3
+            else:
+                return 1
+
+    def price_estimate(self, chess: int, xpos: int) -> int:
         """调用这个方法后，返回一个更可信的价值
         不过无论再可信也只不过是一个Naive value罢了"""
-
-        # 需要判断的棋子一定是敌方棋子
-        # 判断卒的价值一定需要y坐标
-        # 
-
+        # 卒价值1(未过河)/3(过河)，其它不可过河单位价值2，可过河单位价值4，将价值100
         price_map = {
-            1: {1: 10,
-                2: 1,
-                3: 1,
-                4: 2,
-                5: 2,
-                6: 2,
-                7: pawn_value(side, pos)
+            1: {1: -200,
+                2: -4,
+                3: -4,
+                4: -8,
+                5: -8,
+                6: -8,
+                7: self._pawn_value(xpos, negative=True),
+                21: 100,
+                22: 2,
+                23: 2,
+                24: 4,
+                25: 4,
+                26: 4,
+                27: self._pawn_value(xpos)
                 },
 
-            21: {21: 10,
-                 22: 1,
-                 23: 1,
-                 24: 2,
-                 25: 2,
-                 26: 2,
-                 27: pawn_value()
-                 }
+            21: {21: -200,
+                 22: -4,
+                 23: -4,
+                 24: -8,
+                 25: -8,
+                 26: -8,
+                 27: self._pawn_value(xpos, negative=True),
+                 1: 100,
+                 2: 2,
+                 3: 2,
+                 4: 4,
+                 5: 4,
+                 6: 4,
+                 7: self._pawn_value(xpos)
+                 },
         }
-        return price_map[side][chess]
+        return price_map[self.side][chess]
+
     # TODO: 反向传播
+
+    # TODO: Alpha-Beta Pruning

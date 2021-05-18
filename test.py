@@ -6,7 +6,7 @@ MAINBOARD = board.Board()
 SIDE = 1
 
 root = Node(tuple(MAINBOARD.board), SIDE, 0)
-tree = MinimaxTreeSearch(root, MAINBOARD)
+tree = MinimaxTreeSearch(root, SIDE, MAINBOARD)
 
 origin_time = time.process_time()
 for i in range(4):

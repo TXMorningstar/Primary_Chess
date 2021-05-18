@@ -49,5 +49,36 @@
 # tree.del_node("")
 # print(tree.tree)
 
-from time import clock
-clock()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
