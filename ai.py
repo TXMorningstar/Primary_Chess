@@ -96,8 +96,9 @@ class MinimaxTreeSearch(Tree):
         """调用该方法后会根据传入的战略表拓展节点"""
         start_pos, dest_pos, price = strategy  # 解包
         board = self.board_obj.move(start_pos, dest_pos, board=parent_node.board)  # 计算衍生出的新棋盘
-        side = switch_side(parent_node.side)  # 切换回合
-        child_node = Node(board, side, price)  # 生成子节点
+        side = switch_side(parent_node.side)  # 切换该节点的回合
+        value = self.price_estimate(price, dest_pos[0])  # 生成一个更可信的价值
+        child_node = Node(board, side, value)  # 生成子节点
         self.insert_node(child_node, parent_node.location)  # 将新的节点插入进树中
 
     def grow(self, level):
@@ -128,7 +129,8 @@ class MinimaxTreeSearch(Tree):
         不过无论再可信也只不过是一个Naive value罢了"""
         # 卒价值1(未过河)/3(过河)，其它不可过河单位价值2，可过河单位价值4，将价值100
         price_map = {
-            1: {1: -200,
+            1: {0: 0,
+                1: -200,
                 2: -4,
                 3: -4,
                 4: -8,
@@ -144,7 +146,8 @@ class MinimaxTreeSearch(Tree):
                 27: self._pawn_value(xpos)
                 },
 
-            21: {21: -200,
+            21: {0: 0,
+                 21: -200,
                  22: -4,
                  23: -4,
                  24: -8,
