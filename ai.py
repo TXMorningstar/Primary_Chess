@@ -97,7 +97,7 @@ class MinimaxTreeSearch(Tree):
         start_pos, dest_pos, price = strategy  # 解包
         board = self.board_obj.move(start_pos, dest_pos, board=parent_node.board)  # 计算衍生出的新棋盘
         side = switch_side(parent_node.side)  # 切换该节点的回合
-        value = self.price_estimate(price, dest_pos[0])  # 生成一个更可信的价值
+        value = self.price_estimate(price, dest_pos[0]) + parent_node.price  # 生成一个更可信的价值
         child_node = Node(board, side, value)  # 生成子节点
         self.insert_node(child_node, parent_node.location)  # 将新的节点插入进树中
 
@@ -111,7 +111,8 @@ class MinimaxTreeSearch(Tree):
                 self.expand(node, step)  # 根据战略表拓展树
         self.depth += 1
 
-    def _pawn_value(self, xpos: int, negative: bool = False) -> int:
+    @staticmethod
+    def _pawn_value(xpos: int, negative: bool = False) -> int:
         # reverse代表正在被计算的棋子是一颗自己的棋子
         if negative:
             if xpos <= 4:
