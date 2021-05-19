@@ -1,8 +1,8 @@
-import board
+import chess
 import ai
 from tools import *
 
-MAIN_BOARD = board.Board()
+MAIN_BOARD = chess.Board()
 VERSION = 0.1
 SIDE = 1
 

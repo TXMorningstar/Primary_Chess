@@ -1,21 +1,22 @@
 from copy import copy
 from copy import deepcopy
+from chess import Board
 from tools import *
 
 
 class Node(object):
     """节点对象"""
 
-    def __init__(self, board: tuple, side: int, price: int, location=None):
+    def __init__(self, board: tuple, side: int, value: int, location=None):
         if location is None:
             location = list()
         self.board = board
         self.side = side
-        self.price = price
+        self.value = value
         self.location = copy(location)
 
     def __repr__(self):
-        return self.price
+        return self.value
 
 
 class Tree(object):
@@ -24,14 +25,14 @@ class Tree(object):
     def __init__(self, root):
         self.tree = [root]
 
-    def get_node(self, location: list, leaf: bool = False):
+    def get_node(self, location: list, ret_list: bool = False):
         """获取某个节点"""
         node = self.tree
         if location:  # 防止请求根节点
             for i in location:
                 node = node[i]  # 索引至树
 
-        if leaf:
+        if ret_list:
             return node
         return node[0]
 
@@ -61,7 +62,7 @@ class Tree(object):
     def insert_node(self, node: object, location: list = "") -> list:
         """在树的指定位置插入一个节点，返回节点的定位符"""
         # 获取需要插入节点的位置
-        parent = self.get_node(location, leaf=True)
+        parent = self.get_node(location, ret_list=True)
         # 插入节点
         # noinspection PyTypeChecker
         parent.append([node])
@@ -73,15 +74,15 @@ class Tree(object):
 
 
 class MinimaxTreeSearch(Tree):
-    """使用遍历所有可行动路线的方式判断下一个落子点"""
+    """基于列表树的MiniMax Tree Search算法"""
 
-    def __init__(self, root: object, side: int, board_obj: object):
+    def __init__(self, root: Node):
         super().__init__(root)
-        self.board_obj = board_obj
+        self.board_obj = Board()
         self.depth = 0
-        self.side = side
+        self.side = root.side
 
-    def analyze(self, node: object) -> tuple:
+    def analyze(self, node: Node) -> tuple:
         """该方法会返回节点下所有可以行动的策略"""
         strategy = list()
         ally_chess = self.board_obj.get_ally_chess(node.side, node.board)
@@ -92,24 +93,46 @@ class MinimaxTreeSearch(Tree):
                 strategy.append((chess, (x, y), price))  # 将落子点与棋子都存入战略表中
         return tuple(strategy)
 
-    def expand(self, parent_node: object, strategy: tuple):
+    def expand(self, parent_node: Node, strategy: tuple):
         """调用该方法后会根据传入的战略表拓展节点"""
         start_pos, dest_pos, price = strategy  # 解包
         board = self.board_obj.move(start_pos, dest_pos, board=parent_node.board)  # 计算衍生出的新棋盘
         side = switch_side(parent_node.side)  # 切换该节点的回合
-        value = self.price_estimate(price, dest_pos[0]) + parent_node.price  # 生成一个更可信的价值
-        child_node = Node(board, side, value)  # 生成子节点
+        reward = self.price_estimate(price, dest_pos[0]) + parent_node.value  # 生成一个更可信的价值
+        child_node = Node(board, side, reward)  # 生成子节点
         self.insert_node(child_node, parent_node.location)  # 将新的节点插入进树中
 
-    def grow(self, level):
+    def grow(self, level, final: bool = False):
         """调用这个方法后，树会自动解析节点并向下延伸一层新的叶节点"""
-        new_node = self.get_node_by_level(level)  # 获取一层内的所有节点
+        new_node = self.get_node_by_level(level, leaf=True)  # 获取一层内的所有节点
         # 扫描所有可落子点
         for node in new_node:  # 依次扫描new_code中的节点的友方棋子
-            strategy = self.analyze(node)  # 生成战略表
+            strategy = self.analyze(node[0])  # 生成战略表
             for step in strategy:
-                self.expand(node, step)  # 根据战略表拓展树
+                self.expand(node[0], step)  # 根据战略表拓展树
+            if final:
+                self.instance_backward(node)  # 调用反向传播算法，向父节点传递
         self.depth += 1
+
+        # node即为父节点
+
+    def instance_backward(self, parent_tree: list):
+        """根据传入的父节点，将它的子节点价值传回父节点，修改父节点的价值"""
+        value_set = list()
+        for node in parent_tree:
+            if type(node) != list:
+                parent = node
+            else:
+                value_set.append(node[0].value)
+        # Mini or Max
+        if parent.side != self.side:  # 若side != self.side，取最大值向上传递
+            value = max(value_set)
+        else:  # 否则，取最小值向上传递
+            value = min(value_set)
+        parent.value = value
+
+    def group_backward(self, level):
+        pass
 
     @staticmethod
     def _pawn_value(xpos: int, negative: bool = False) -> int:
@@ -165,7 +188,5 @@ class MinimaxTreeSearch(Tree):
                  },
         }
         return price_map[self.side][chess]
-
-    # TODO: 反向传播
 
     # TODO: Alpha-Beta Pruning
