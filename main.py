@@ -43,17 +43,22 @@ def single_vs_single():
 
 def single_vs_bot():
     """玩家对战AI"""
+    global SIDE
     if SIDE == 1:
         single_vs_single()
     else:
-        pass
-
+        print("对手思考中……")
+        root = ai.Node(MAIN_BOARD.board, SIDE, 0)
+        tree = ai.MinimaxTreeSearch(root)
+        strategy = tree.next_move(4)
+        MAIN_BOARD.move(strategy[0], strategy[1], confirm=True)
+        SIDE = switch_side(SIDE)
 
 def main():
     welcome()
     while True:
         MAIN_BOARD.print_board()
-        single_vs_single()
+        single_vs_bot()
 
 
 if __name__ == "__main__":
