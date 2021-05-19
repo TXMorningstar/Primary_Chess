@@ -1,5 +1,4 @@
 from copy import copy
-from copy import deepcopy
 from chess import Board
 from tools import *
 
@@ -7,16 +6,15 @@ from tools import *
 class Node(object):
     """节点对象"""
 
-    def __init__(self, board: tuple, side: int, value: int, location=None):
-        if location is None:
-            location = list()
+    def __init__(self, board: tuple, side: int, value: int, strategy: tuple = tuple(), location: list = list()):
         self.board = board
         self.side = side
         self.value = value
         self.location = copy(location)
+        self.strategy = strategy
 
     def __repr__(self):
-        return self.value
+        return str(self.value)
 
 
 class Tree(object):
@@ -39,25 +37,22 @@ class Tree(object):
     def get_node_by_level(self, level: int, leaf: bool = False) -> list:
         """传入层数获取某一层的节点"""
         result = list()  # 储存结果
-        next_search = [deepcopy(self.tree)]  # 储存搜索过程中找到的叶节点
+        search, next_search = [self.tree], [self.tree]  # 储存搜索过程中找到的叶节点
 
-        for i in range(level + 1):
-            search = next_search.copy()
+        # 搜索最后一层
+        for i in range(level):
+            search = next_search
             next_search = list()
 
-            # 如果是其它层，那么去掉头，将剩余部分放入待探索列表
-            if i != level:
-                for node in search:
-                    node.pop(0)
-                    next_search.extend(node)
-            # 如果是目标层，那么把头放进结果列表
-            else:
-                for node in search:
-                    if leaf:
-                        result.append(node)
-                    else:
-                        result.append(node[0])
-        return result
+            for node in search:
+                next_search.extend(node[1:])
+
+        if leaf:
+            return next_search
+        else:
+            for node in next_search:
+                result.append(node[0])
+            return result
 
     def insert_node(self, node: object, location: list = "") -> list:
         """在树的指定位置插入一个节点，返回节点的定位符"""
@@ -67,7 +62,7 @@ class Tree(object):
         # noinspection PyTypeChecker
         parent.append([node])
         # 更新节点定位符信息
-        child_location = deepcopy(location)
+        child_location = copy(location)
         child_location.append(parent.__len__() - 1)
         node.location = child_location
         return child_location
@@ -99,10 +94,10 @@ class MinimaxTreeSearch(Tree):
         board = self.board_obj.move(start_pos, dest_pos, board=parent_node.board)  # 计算衍生出的新棋盘
         side = switch_side(parent_node.side)  # 切换该节点的回合
         reward = self.price_estimate(price, dest_pos[0]) + parent_node.value  # 生成一个更可信的价值
-        child_node = Node(board, side, reward)  # 生成子节点
+        child_node = Node(board, side, reward, strategy=(start_pos, dest_pos))  # 生成子节点
         self.insert_node(child_node, parent_node.location)  # 将新的节点插入进树中
 
-    def grow(self, level, final: bool = False):
+    def grow(self, level, backward: bool = False):
         """调用这个方法后，树会自动解析节点并向下延伸一层新的叶节点"""
         new_node = self.get_node_by_level(level, leaf=True)  # 获取一层内的所有节点
         # 扫描所有可落子点
@@ -110,13 +105,35 @@ class MinimaxTreeSearch(Tree):
             strategy = self.analyze(node[0])  # 生成战略表
             for step in strategy:
                 self.expand(node[0], step)  # 根据战略表拓展树
-            if final:
-                self.instance_backward(node)  # 调用反向传播算法，向父节点传递
+            if backward:
+                self.value_backward(node)  # 调用反向传播算法，向父节点传递
         self.depth += 1
 
-        # node即为父节点
+    def next_move(self, depth: int) -> tuple:
+        """调用这个方法后，返回一个ai计算出的战略表"""
+        depth -= 1
+        for i in range(depth):
+            self.grow(i)
+        self.grow(depth)
+        for i in range(depth-1):
+            self.level_backward(depth)
+            depth -= 1
+        return self.final_select()
 
-    def instance_backward(self, parent_tree: list):
+    def final_select(self) -> tuple:
+        """根据第一层节点的价值选择"""
+        nodes_list = self.get_node_by_level(1)
+        max_value = -1024
+        max_value_location = 1
+        node_location = 0
+        for node in nodes_list:
+            if node.value >= max_value:
+                max_value = node.value
+                max_value_location = node_location
+            node_location += 1
+        return nodes_list[max_value_location].strategy
+
+    def value_backward(self, parent_tree: list) -> int:
         """根据传入的父节点，将它的子节点价值传回父节点，修改父节点的价值"""
         value_set = list()
         for node in parent_tree:
@@ -125,14 +142,18 @@ class MinimaxTreeSearch(Tree):
             else:
                 value_set.append(node[0].value)
         # Mini or Max
-        if parent.side != self.side:  # 若side != self.side，取最大值向上传递
-            value = max(value_set)
-        else:  # 否则，取最小值向上传递
+        if parent.side != self.side:
             value = min(value_set)
+        else:  # 否则，取最小值向上传递
+            value = max(value_set)
         parent.value = value
+        return value
 
-    def group_backward(self, level):
-        pass
+    def level_backward(self, level):
+        """传入一个整型，将这一层的价值传递给它们的父节点"""
+        parents_list = self.get_node_by_level(level-1, leaf=True)  # 获得所有的父节点
+        for parent in parents_list:
+            self.value_backward(parent)
 
     @staticmethod
     def _pawn_value(xpos: int, negative: bool = False) -> int:
