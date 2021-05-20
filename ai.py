@@ -136,6 +136,8 @@ class MinimaxTreeSearch(Tree):
     def value_backward(self, parent_tree: list) -> int:
         """根据传入的父节点，将它的子节点价值传回父节点，修改父节点的价值"""
         value_set = list()
+        if parent_tree.__len__() <= 1:
+            return parent_tree[0].value
         for node in parent_tree:
             if type(node) != list:
                 parent = node
@@ -143,9 +145,9 @@ class MinimaxTreeSearch(Tree):
                 value_set.append(node[0].value)
         # Mini or Max
         if parent.side != self.side:
-            value = min(value_set)
-        else:  # 否则，取最小值向上传递
             value = max(value_set)
+        else:  # 否则，取最小值向上传递
+            value = min(value_set)
         parent.value = value
         return value
 
@@ -160,9 +162,9 @@ class MinimaxTreeSearch(Tree):
         # reverse代表正在被计算的棋子是一颗自己的棋子
         if negative:
             if xpos <= 4:
-                return -2
+                return -1
             else:
-                return -6
+                return -3
         else:
             if xpos <= 4:
                 return 3
@@ -176,11 +178,11 @@ class MinimaxTreeSearch(Tree):
         price_map = {
             1: {0: 0,
                 1: -200,
-                2: -4,
-                3: -4,
-                4: -8,
-                5: -8,
-                6: -8,
+                2: -2,
+                3: -2,
+                4: -4,
+                5: -4,
+                6: -4,
                 7: self._pawn_value(xpos, negative=True),
                 21: 100,
                 22: 2,
@@ -193,11 +195,11 @@ class MinimaxTreeSearch(Tree):
 
             21: {0: 0,
                  21: -200,
-                 22: -4,
-                 23: -4,
-                 24: -8,
-                 25: -8,
-                 26: -8,
+                 22: -2,
+                 23: -2,
+                 24: -4,
+                 25: -4,
+                 26: -4,
                  27: self._pawn_value(xpos, negative=True),
                  1: 100,
                  2: 2,

@@ -346,6 +346,10 @@ class Board(object):
                 ex, ey = ex + strategy[0], ey + strategy[1]  # 更新探索点
                 if self.inside_board((ex, ey)):
                     if self.check_chess_type_by_pos((ex, ey), 0, board=board):
+                        if price:
+                            result.append((ex, ey, 0))
+                        else:
+                            result.append((ex, ey))
                         continue  # 如果探索点为空，则进行下一次搜索
                     else:  # 探索点发现棋子，这个棋子无法吃掉，我们需要跳过它进行第二次搜索
                         while True:

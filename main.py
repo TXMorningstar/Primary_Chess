@@ -29,7 +29,7 @@ def input_chess(msg: str = None) -> tuple:
 ########################################################################################################################
 
 
-def single_vs_single():
+def player_take_turn():
     """玩家对战自己"""
     global SIDE
     move_start = input_chess("你想要移动哪一颗棋子？")
@@ -41,24 +41,39 @@ def single_vs_single():
         print("只能移动自己的棋子")
 
 
-def single_vs_bot():
-    """玩家对战AI"""
+def bot_take_turn(level):
     global SIDE
-    if SIDE == 1:
-        single_vs_single()
-    else:
-        print("对手思考中……")
-        root = ai.Node(MAIN_BOARD.board, SIDE, 0)
-        tree = ai.MinimaxTreeSearch(root)
-        strategy = tree.next_move(4)
-        MAIN_BOARD.move(strategy[0], strategy[1], confirm=True)
-        SIDE = switch_side(SIDE)
+    print("对手思考中……")
+    root = ai.Node(MAIN_BOARD.board, SIDE, 0)
+    tree = ai.MinimaxTreeSearch(root)
+    strategy = tree.next_move(level)
+    MAIN_BOARD.move(strategy[0], strategy[1], confirm=True)
+    SIDE = switch_side(SIDE)
+
 
 def main():
     welcome()
+    level = int(input("电脑难度："))
+    MAIN_BOARD.board = [
+            [0, 0, 0, 0, 1, 0, 0, 0, 0],  # 0
+            [0, 24, 0, 0, 0, 0, 0, 0, 0],  # 1
+            [0, 0, 0, 0, 0, 0, 24, 0, 0],  # 2
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 3
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 4
+            # 楚河  汉界
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 5
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 6
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 7
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],  # 8
+            [0, 0, 0, 0, 21, 0, 0, 0, 0]  # 9
+        ]
+    global SIDE
     while True:
         MAIN_BOARD.print_board()
-        single_vs_bot()
+        if SIDE == 21:
+            player_take_turn()
+        else:
+            bot_take_turn(level)
 
 
 if __name__ == "__main__":
