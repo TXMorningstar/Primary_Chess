@@ -6,15 +6,16 @@ from tools import *
 class Node(object):
     """节点对象"""
 
-    def __init__(self, board: tuple, side: int, value: int, strategy: tuple = tuple(), location: list = list()):
+    def __init__(self, board: tuple, side: int, value: int, self_value: int = 0, strategy: tuple = tuple(), location: list = list()):
         self.board = board
         self.side = side
+        self.self_value = self_value
         self.value = value
         self.location = copy(location)
         self.strategy = strategy
 
     def __repr__(self):
-        return str(self.value)
+        return str(self.self_value)
 
 
 class Tree(object):
@@ -93,8 +94,9 @@ class MinimaxTreeSearch(Tree):
         start_pos, dest_pos, price = strategy  # 解包
         board = self.board_obj.move(start_pos, dest_pos, board=parent_node.board)  # 计算衍生出的新棋盘
         side = switch_side(parent_node.side)  # 切换该节点的回合
-        reward = self.price_estimate(price, dest_pos[0]) + parent_node.value  # 生成一个更可信的价值
-        child_node = Node(board, side, reward, strategy=(start_pos, dest_pos))  # 生成子节点
+        price = self.price_estimate(price, dest_pos[0])  # 生成一个更可信的价值
+        reward = price + parent_node.value
+        child_node = Node(board, side, reward, self_value=price, strategy=(start_pos, dest_pos))  # 生成子节点
         self.insert_node(child_node, parent_node.location)  # 将新的节点插入进树中
 
     def grow(self, level, backward: bool = False):
@@ -114,7 +116,7 @@ class MinimaxTreeSearch(Tree):
         depth -= 1
         for i in range(depth):
             self.grow(i)
-        self.grow(depth)
+        self.grow(depth, backward=True)
         for i in range(depth-1):
             self.level_backward(depth)
             depth -= 1
@@ -145,10 +147,14 @@ class MinimaxTreeSearch(Tree):
                 value_set.append(node[0].value)
         # Mini or Max
         if parent.side != self.side:
-            value = max(value_set)
-        else:  # 否则，取最小值向上传递
             value = min(value_set)
+            method = "min"
+        else:  # 否则，取最小值向上传递
+            value = max(value_set)
+            method = "max"
         parent.value = value
+        parent.select = value
+        parent.method = method
         return value
 
     def level_backward(self, level):
