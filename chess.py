@@ -182,10 +182,14 @@ class Board(object):
             else:
                 return False
 
-    def _cross_river(self, pos: tuple, expo_pos: tuple) -> bool:
+    def _cross_river(self, pos: tuple, expo_pos: tuple, chess: int = None, board: tuple = None) -> bool:
         """传入一个棋子的坐标以及探索点坐标，返回探索点位置是否过河"""
         x, y, ex, ey = pos[0], pos[1], expo_pos[0], expo_pos[1]
-        if self.board[x][y] <= 10:
+        if not board:
+            board = self.board
+        if not chess:
+            chess = board[x][y]
+        if chess <= 10:
             if ex <= 4:  # 棋子为1~7, 5,6,7,8,9过河
                 return False
             else:
@@ -230,7 +234,7 @@ class Board(object):
             # noinspection PyArgumentList
             return function_map[chess](pos, board=board, price=price)
 
-    def king(self, pos: tuple, board: tuple = None, price: bool = False) -> tuple:
+    def king(self, pos: tuple, board: tuple = None, price: bool = False, *args) -> tuple:
         """将的行走规则"""
         if not board:
             board = self.board
@@ -250,7 +254,7 @@ class Board(object):
                             result.append((ex, ey))
         return tuple(result)
 
-    def guard(self, pos: tuple, board: tuple = None, price: bool = False) -> tuple:
+    def guard(self, pos: tuple, board: tuple = None, price: bool = False, *args) -> tuple:
         """仕的行走规则"""
         if not board:
             board = self.board
@@ -268,7 +272,7 @@ class Board(object):
                             result.append((ex, ey))
         return tuple(result)
 
-    def minister(self, pos: tuple, board: tuple = None, price: bool = False) -> tuple:
+    def minister(self, pos: tuple, board: tuple = None, price: bool = False, *args) -> tuple:
         """相的行走规则"""
         x, y = pos
         result = list()
@@ -284,7 +288,7 @@ class Board(object):
                             result.append((ex, ey))
         return tuple(result)
 
-    def horse(self, pos: tuple, board: tuple = None, price: bool = False) -> tuple:
+    def horse(self, pos: tuple, board: tuple = None, price: bool = False, *args) -> tuple:
         """馬的行走规则"""
         if not board:
             board = self.board
@@ -309,7 +313,7 @@ class Board(object):
                                     result.append((ex_nd, ey_nd))
         return tuple(result)
 
-    def chariot(self, pos: tuple, board: tuple = None, price: bool = False) -> tuple:
+    def chariot(self, pos: tuple, board: tuple = None, price: bool = False, *args) -> tuple:
         """車的行走规则"""
         if not board:
             board = self.board
@@ -332,7 +336,7 @@ class Board(object):
                 break
         return tuple(result)
 
-    def cannon(self, pos: tuple, board: tuple = None, price: bool = False) -> tuple:
+    def cannon(self, pos: tuple, board: tuple = None, price: bool = False, *args) -> tuple:
         """炮的行走规则"""
         if not board:
             board = self.board
@@ -368,7 +372,7 @@ class Board(object):
                 break
         return tuple(result)
 
-    def pawn(self, pos: tuple, board: tuple = None, price: bool = False) -> tuple:
+    def pawn(self, pos: tuple, board: tuple = None, price: bool = False, *args) -> tuple:
         """卒的行走规则"""
         if not board:
             board = self.board
@@ -378,7 +382,7 @@ class Board(object):
         chess = board[x][y]  # 找到棋子的具体数值，根据它来决定移动策略
         result = list()
 
-        if self._cross_river((x, y), (x, y)):  # 过河后
+        if self._cross_river((x, y), (x, y), chess=chess, board=board):  # 过河后
             for strategy in self.pawn_strategy_crossed[chess]:
                 ex, ey = x + strategy[0], y + strategy[1]
                 if self.inside_board((ex, ey)):
@@ -409,7 +413,7 @@ class Board(object):
                 self._update_board(new_board, board)
             return new_board
         else:
-            raise ValueError("无法移动这个棋子")
+            raise ValueError("无法移动这个棋子", start, end)
 
     def judge(self) -> bool:
         """判断玩家是否获胜。可选择传入指定的棋盘。返回一个布尔值，真代表当前执子方获胜"""

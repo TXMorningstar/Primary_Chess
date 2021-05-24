@@ -75,6 +75,7 @@ class MinimaxTreeSearch(Tree):
     def __init__(self, root: Node):
         super().__init__(root)
         self.board_obj = Board()
+        self.board_obj.board = root.board
         self.depth = 0
         self.side = root.side
 
@@ -94,7 +95,7 @@ class MinimaxTreeSearch(Tree):
         start_pos, dest_pos, price = strategy  # 解包
         board = self.board_obj.move(start_pos, dest_pos, board=parent_node.board)  # 计算衍生出的新棋盘
         side = switch_side(parent_node.side)  # 切换该节点的回合
-        price = self.price_estimate(price, dest_pos[0])  # 生成一个更可信的价值
+        price = self.naive_value_estimate(price, dest_pos[0])  # 生成一个更可信的价值
         reward = price + parent_node.value
         child_node = Node(board, side, reward, self_value=price, strategy=(start_pos, dest_pos))  # 生成子节点
         self.insert_node(child_node, parent_node.location)  # 将新的节点插入进树中
@@ -148,13 +149,9 @@ class MinimaxTreeSearch(Tree):
         # Mini or Max
         if parent.side != self.side:
             value = min(value_set)
-            method = "min"
         else:  # 否则，取最小值向上传递
             value = max(value_set)
-            method = "max"
         parent.value = value
-        parent.select = value
-        parent.method = method
         return value
 
     def level_backward(self, level):
@@ -177,7 +174,7 @@ class MinimaxTreeSearch(Tree):
             else:
                 return 1
 
-    def price_estimate(self, chess: int, xpos: int) -> int:
+    def naive_value_estimate(self, chess: int, xpos: int) -> int:
         """调用这个方法后，返回一个更可信的价值
         不过无论再可信也只不过是一个Naive value罢了"""
         # 卒价值1(未过河)/3(过河)，其它不可过河单位价值2，可过河单位价值4，将价值100
